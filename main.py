@@ -2,7 +2,7 @@ import pygame
 from car import Car
 from time import sleep
 from obstacle import Obstacle
-from physics import PAGE_WIDTH, PAGE_HEIGHT, CAR_WIDTH, CAR_HEIGHT, LANE_MARGIN, NO_OF_LANES, TARMAC, WHITE, BLACK, RED, GREEN, BLUE, WHITE
+from physics import PAGE_WIDTH, PAGE_HEIGHT, CAR_WIDTH, CAR_HEIGHT, LANE_MARGIN, COLLISION_ALLOWANCE, NO_OF_LANES, TARMAC, WHITE, BLACK, RED, GREEN, BLUE, WHITE
 
 from pygame.locals import (
     K_ESCAPE,
@@ -41,10 +41,14 @@ def setup_scene():
 def crash():
     display_message('You crashed!')
     sleep(2)
+    allSprites.empty()
+    obstacles.empty()
+    car.reset()
+    allSprites.add(car)
     game_loop()
 
 def display_message(message):
-    mediumTxt = pygame.font.Font('innermountingflame.ttf', 80)
+    mediumTxt = pygame.font.Font('./resources/innermountingflame.ttf', 40)
     textSurface = mediumTxt.render(message, True, WHITE)
     textRect = textSurface.get_rect()
     textRect.center = (int(PAGE_WIDTH/2), int(PAGE_HEIGHT/2))
@@ -74,16 +78,18 @@ def game_loop():
                 obstacles.add(obstacle)
 
         for obstacle in obstacles:
-            obstacle.move()
+            if pygame.sprite.spritecollideany(car, obstacles):
+                gameEnded = True
+                crash()
+                break
+            else:
+                obstacle.move()  
 
         pressed_keys = pygame.key.get_pressed()
         car.update(pressed_keys)
+
         allSprites.draw(gameDisplay)
         pygame.display.update()
         clock.tick(30)
 
-
 game_loop()
-
-pygame.quit()
-quit()
