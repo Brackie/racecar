@@ -25,7 +25,8 @@ class Car(pygame.sprite.Sprite):
         self.speed = 5
 
     def reset(self):
-        self.rect.move_ip(int((PAGE_WIDTH/2) - (CAR_WIDTH/2)), int(PAGE_HEIGHT * 0.8))
+        self.rect.x = int((PAGE_WIDTH/2) - (CAR_WIDTH/2))
+        self.rect.y = int(PAGE_HEIGHT * 0.8)
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP] or pressed_keys[K_w]:
