@@ -22,7 +22,7 @@ class Car(pygame.sprite.Sprite):
         self.rect.x = int((PAGE_WIDTH/2) - (CAR_WIDTH/2))
         self.rect.y = int(PAGE_HEIGHT * 0.8)
 
-        self.speed = 5
+        self.speed = 8
 
     def reset(self):
         self.rect.x = int((PAGE_WIDTH/2) - (CAR_WIDTH/2))
