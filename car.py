@@ -1,5 +1,5 @@
 import pygame
-from physics import PAGE_WIDTH, PAGE_HEIGHT, CAR_WIDTH, CAR_HEIGHT
+from physics import *
 from pygame.locals import (
     K_UP,
     K_w,
@@ -19,33 +19,38 @@ class Car(pygame.sprite.Sprite):
         self.image = pygame.image.load('./resources/racecar.png').convert_alpha()
         self.rect = self.image.get_rect()
 
-        self.rect.x = int((PAGE_WIDTH/2) - (CAR_WIDTH/2))
+        self.rect.x = (LANE_MARGIN + (CAR_WIDTH * 2))
         self.rect.y = int(PAGE_HEIGHT * 0.8)
 
-        self.speed = 8
+        self.vel = 100
 
     def reset(self):
-        self.rect.x = int((PAGE_WIDTH/2) - (CAR_WIDTH/2))
+        self.vel = 100
+        self.rect.x = (LANE_MARGIN + (CAR_WIDTH * 2))
         self.rect.y = int(PAGE_HEIGHT * 0.8)
 
-    def update(self, pressed_keys):
-        if pressed_keys[K_UP] or pressed_keys[K_w]:
-            self.rect.move_ip(0, -self.speed)
-        
-        elif pressed_keys[K_DOWN] or pressed_keys[K_s]:
-            self.rect.move_ip(0, self.speed)
+    def update(self, pressed_keys, a, dt):
 
-        elif pressed_keys[K_LEFT] or pressed_keys[K_a]:
-            self.rect.move_ip(-self.speed, 0)
+        self.vel = apply_accelaration(self.vel, a, dt)
+        self.ds = int(apply_displacement(self.vel, dt))
+
+        # if pressed_keys[K_UP] or pressed_keys[K_w]:
+        #     self.rect.move_ip(0, -self.ds)
+        
+        # elif pressed_keys[K_DOWN] or pressed_keys[K_s]:
+        #     self.rect.move_ip(0, self.ds)
+
+        if pressed_keys[K_LEFT] or pressed_keys[K_a]:
+            self.rect.move_ip(-self.ds, 0)
 
         elif pressed_keys[K_RIGHT] or pressed_keys[K_d]:
-            self.rect.move_ip(self.speed, 0)
+            self.rect.move_ip(self.ds, 0)
 
-        if self.rect.left < 0:
-            self.rect.left = 0
+        if self.rect.left < LANE_MARGIN:
+            self.rect.left = LANE_MARGIN
 
-        if self.rect.right > PAGE_WIDTH:
-            self.rect.right = PAGE_WIDTH
+        if self.rect.right > (PAGE_WIDTH - LANE_MARGIN):
+            self.rect.right = (PAGE_WIDTH - LANE_MARGIN)
 
         if self.rect.top <= 0:
             self.rect.top = 0
