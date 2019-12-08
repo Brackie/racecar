@@ -1,9 +1,10 @@
 import pygame
 from car import Car
 from road import Road
-from time import sleep
+from bush import Bush
+from time import sleep, time
 from obstacle import Obstacle
-from physics import PAGE_WIDTH, PAGE_HEIGHT, CAR_WIDTH, CAR_HEIGHT, LANE_MARGIN, COLLISION_ALLOWANCE, NO_OF_LANES, TARMAC, WHITE, BLACK, RED, GREEN, BLUE, WHITE
+from physics import *
 
 from pygame.locals import (
     K_ESCAPE,
@@ -20,6 +21,7 @@ clock = pygame.time.Clock()
 
 allSprites = pygame.sprite.Group()
 obstacles = pygame.sprite.Group()
+bushes = pygame.sprite.Group()
 
 road = Road()
 
@@ -50,36 +52,79 @@ def game_loop():
     gameEnded = False
     pygame.event.clear()
 
-    while not gameEnded:
+    a = 0
+    t0 = time() 
 
+    while not gameEnded:
         road.draw()
 
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
                 gameEnded = True
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     gameEnded = True
+
+                elif event.key == pygame.K_UP or event.key == pygame.K_w:
+                    a = ACCELARATION
+                
+                elif (
+                        event.key == pygame.K_LEFT or 
+                        event.key == pygame.K_a or 
+                        event.key == pygame.K_RIGHT or 
+                        event.key == pygame.K_d
+                    ):
+                    a = 0
+
+            elif event.type == pygame.KEYUP:
+                if (
+                    event.key == pygame.K_UP or 
+                    event.key == pygame.K_DOWN or 
+                    event.key == pygame.K_w or 
+                    event.key == pygame.K_s or 
+                    event.key == pygame.K_LEFT or 
+                    event.key == pygame.K_a or 
+                    event.key == pygame.K_RIGHT or 
+                    event.key == pygame.K_d
+                ):
+                    a = 0
+                    
             elif event.type == E_ADDOBSTACLE:
                 obstacle = Obstacle()
-                allSprites.add(obstacle)
-                obstacles.add(obstacle)
+                bush = Bush()
+
+                allSprites.add(bush)
+                bushes.add(bush)
+
+                if not car.rect.colliderect(obstacle.rect):                   
+                    allSprites.add(obstacle)
+                    obstacles.add(obstacle)
+
+        t1 = time()
+        dt = (t1 - t0)
+        t0 = t1
+
+        pressed_keys = pygame.key.get_pressed()
+
+        car.update(pressed_keys, ACCELARATION, dt)
 
         for obstacle in obstacles:
-            if pygame.sprite.spritecollideany(car, obstacles):
+            if obstacle.rect.colliderect(car.rect):
                 gameEnded = True
                 crash()
                 break
             else:
-                obstacle.move()  
-
-        road.move()
-
-        pressed_keys = pygame.key.get_pressed()
-        car.update(pressed_keys)
+                obstacle.move(ACCELARATION, dt)  
+        
+        for bush in bushes:
+            bush.move(ACCELARATION, dt)
+            
+        road.move(ACCELARATION, dt)
 
         allSprites.draw(road.gameDisplay)
+        
         pygame.display.update()
 
         clock.tick(30)
